@@ -78,6 +78,7 @@ class Gstreamer < Formula
   depends_on "json-glib"
   depends_on "lame"
   depends_on "libass"
+  depends_on "libnice"
   depends_on "libogg"
   depends_on "libpng"
   depends_on "libshout"
@@ -170,7 +171,7 @@ class Gstreamer < Formula
       -Dpython.purelibdir=#{site_packages}
       -Dpython=enabled
       -Dlibav=enabled
-      -Dlibnice=disabled
+      -Dlibnice=enabled
       -Dbase=enabled
       -Dgood=enabled
       -Dugly=enabled
@@ -235,6 +236,10 @@ class Gstreamer < Formula
     system "meson", "setup", "build", *args, *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
     system "meson", "install", "-C", "build"
+
+    libnice_gst_plugin = Formula["libnice-gstreamer"].opt_libexec/"gstreamer-1.0"/shared_library("libgstnice")
+    gst_plugin_dir = lib/"gstreamer-1.0"
+    ln_sf libnice_gst_plugin.relative_path_from(gst_plugin_dir), gst_plugin_dir
   end
 
   def caveats
