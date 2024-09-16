@@ -24,6 +24,7 @@ class OpenjdkAT11 < Formula
 
   depends_on "autoconf" => :build
   depends_on "pkg-config" => :build
+  depends_on "freetype"
   depends_on "giflib"
   depends_on "harfbuzz"
   depends_on "jpeg-turbo"
@@ -35,10 +36,29 @@ class OpenjdkAT11 < Formula
   uses_from_macos "zip"
   uses_from_macos "zlib"
 
+  on_macos do
+    if DevelopmentTools.clang_build_version == 1600
+      depends_on "llvm" => :build
+
+      fails_with :clang do
+        cause "fatal error while optimizing exploded image for BUILD_JIGSAW_TOOLS"
+      end
+
+      # Apply FreeBSD workaround to avoid UB causing failure on recent Clang.
+      # A proper fix requires backport of 8229258[^1] which was previously attempted[^2].
+      #
+      # [^1]: https://bugs.openjdk.org/browse/JDK-8229258
+      # [^2]: https://github.com/openjdk/jdk11u/pull/23
+      patch do
+        url "https://github.com/battleblow/jdk11u/commit/305a68a90c722aa7a7b75589e24d5b5d554c96c1.patch?full_index=1"
+        sha256 "5327c249c379a8db6a9e844e4fb32471506db8b8e3fef1f62f5c0c892684fe15"
+      end
+    end
+  end
+
   on_linux do
     depends_on "alsa-lib"
     depends_on "fontconfig"
-    depends_on "freetype"
     depends_on "libx11"
     depends_on "libxext"
     depends_on "libxi"
@@ -74,6 +94,16 @@ class OpenjdkAT11 < Formula
   end
 
   def install
+    if DevelopmentTools.clang_build_version == 1600
+      ENV.llvm_clang
+      ENV.remove "HOMEBREW_LIBRARY_PATHS", Formula["llvm"].opt_lib
+      # ptrauth.h is not available in brew LLVM
+      inreplace "src/hotspot/os_cpu/bsd_aarch64/pauth_bsd_aarch64.inline.hpp" do |s|
+        s.sub! "#include <ptrauth.h>", ""
+        s.sub! "return ptrauth_strip(ptr, ptrauth_key_asib);", "return ptr;"
+      end
+    end
+
     boot_jdk = buildpath/"boot-jdk"
     resource("boot-jdk").stage boot_jdk
     boot_jdk /= "Contents/Home" if OS.mac? && !Hardware::CPU.arm?
@@ -96,6 +126,7 @@ class OpenjdkAT11 < Formula
       --with-vendor-vm-bug-url=#{tap.issues_url}
       --without-version-opt
       --without-version-pre
+      --with-freetype=system
       --with-giflib=system
       --with-harfbuzz=system
       --with-lcms=system
@@ -108,8 +139,13 @@ class OpenjdkAT11 < Formula
     args += if OS.mac?
       ldflags << "-headerpad_max_install_names"
 
+      # Allow unbundling `freetype` on macOS
+      inreplace "make/autoconf/lib-freetype.m4", '= "xmacosx"', '= ""'
+
       %W[
         --enable-dtrace
+        --with-freetype-include=#{Formula["freetype"].opt_include}
+        --with-freetype-lib=#{Formula["freetype"].opt_lib}
         --with-sysroot=#{MacOS.sdk_path}
       ]
     else
@@ -117,7 +153,6 @@ class OpenjdkAT11 < Formula
         --with-x=#{HOMEBREW_PREFIX}
         --with-cups=#{HOMEBREW_PREFIX}
         --with-fontconfig=#{HOMEBREW_PREFIX}
-        --with-freetype=system
         --with-stdc++lib=dynamic
       ]
     end
