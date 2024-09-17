@@ -30,12 +30,13 @@ class Navidrome < Formula
   end
 
   test do
+    mkdir "music"
     assert_equal "#{version} (source_archive)", shell_output("#{bin}/navidrome --version").chomp
     port = free_port
     pid = fork do
       exec bin/"navidrome", "--port", port.to_s
     end
-    sleep 15
+    sleep 30
     assert_equal ".", shell_output("curl http://localhost:#{port}/ping")
   ensure
     Process.kill "TERM", pid
