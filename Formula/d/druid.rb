@@ -1,9 +1,9 @@
 class Druid < Formula
   desc "High-performance, column-oriented, distributed data store"
   homepage "https://druid.apache.org/"
-  url "https://dlcdn.apache.org/druid/30.0.0/apache-druid-30.0.0-bin.tar.gz"
-  mirror "https://archive.apache.org/dist/druid/30.0.0/apache-druid-30.0.0-bin.tar.gz"
-  sha256 "991628ad590dcccf782cfe771bbf1e5b6d0de54b2f30fecbbf8ac0cac98fc17c"
+  url "https://dlcdn.apache.org/druid/30.0.1/apache-druid-30.0.1-bin.tar.gz"
+  mirror "https://archive.apache.org/dist/druid/30.0.1/apache-druid-30.0.1-bin.tar.gz"
+  sha256 "a4c7ece2fc9c9bbbc2d355947f0482603d477d6cede4abcf36ab614ba4656ebe"
   license "Apache-2.0"
 
   livecheck do
@@ -22,11 +22,11 @@ class Druid < Formula
   end
 
   depends_on "zookeeper" => :test
-  depends_on "openjdk@11"
+  depends_on "openjdk"
 
   resource "mysql-connector-java" do
-    url "https://search.maven.org/remotecontent?filepath=mysql/mysql-connector-java/5.1.49/mysql-connector-java-5.1.49.jar"
-    sha256 "5bba9ff50e5e637a0996a730619dee19ccae274883a4d28c890d945252bb0e12"
+    url "https://search.maven.org/remotecontent?filepath=com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar"
+    sha256 "e2a3b2fc726a1ac64e998585db86b30fa8bf3f706195b78bb77c5f99bf877bd9"
   end
 
   def install
@@ -56,7 +56,7 @@ class Druid < Formula
     end
 
     bin.install Dir["#{libexec}/bin/*.sh"]
-    bin.env_script_all_files libexec/"bin", Language::Java.overridable_java_home_env("11")
+    bin.env_script_all_files libexec/"bin", Language::Java.overridable_java_home_env
 
     Pathname.glob("#{bin}/*.sh") do |file|
       mv file, bin/"druid-#{file.basename}"
