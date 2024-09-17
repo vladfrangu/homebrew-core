@@ -79,8 +79,8 @@ class Openjdk < Formula
   end
 
   def install
-    ENV["CC"] = "#{Formula["llvm@17"].opt_bin}/clang -Os"
-    ENV["CXX"] = "#{Formula["llvm@17"].opt_bin}/clang++ -Os"
+    ENV["CC"] = Formula["llvm@17"].opt_bin/"clang"
+    ENV["CXX"] = Formula["llvm@17"].opt_bin/"clang++"
 
     boot_jdk = buildpath/"boot-jdk"
     resource("boot-jdk").stage boot_jdk
@@ -134,6 +134,7 @@ class Openjdk < Formula
     args << "--with-extra-ldflags=#{ldflags.join(" ")}"
 
     cflags = deps.filter_map { |dep| "-I#{dep.to_formula.opt_include}" unless dep.build? }
+    cflags << "-O2"
     args << "--with-extra-cflags=#{cflags.join(" ")}"
     args << "--with-extra-cxxflags=#{cflags.join(" ")}"
 
