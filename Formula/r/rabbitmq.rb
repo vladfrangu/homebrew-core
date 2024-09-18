@@ -1,8 +1,8 @@
 class Rabbitmq < Formula
   desc "Messaging and streaming broker"
   homepage "https://www.rabbitmq.com"
-  url "https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.13.7/rabbitmq-server-generic-unix-3.13.7.tar.xz"
-  sha256 "45e5423c43f15c9d2b6ee5947f8e4f256fcfa0c1e7743e60c473cd006954e1fa"
+  url "https://github.com/rabbitmq/rabbitmq-server/releases/download/v4.0.0/rabbitmq-server-generic-unix-4.0.0.tar.xz"
+  sha256 "df9535096318912fa72dcdde752bb0061c157f4e210d3d9e2c09cdcd0876a907"
   license "MPL-2.0"
 
   livecheck do
@@ -50,7 +50,8 @@ class Rabbitmq < Formula
                                  "rabbitmq_mqtt,rabbitmq_stream]."
     end
 
-    sbin.install prefix/"plugins/rabbitmq_management-#{version}/priv/www/cli/rabbitmqadmin"
+    # Some path issue with the plugin, upstream bug report, https://github.com/rabbitmq/rabbitmq-server/issues/12339
+    sbin.install prefix/"plugins/rabbitmq_management-#{version}+rc.2.6.g7c7b6a5/priv/www/cli/rabbitmqadmin"
     (sbin/"rabbitmqadmin").chmod 0755
     generate_completions_from_executable(sbin/"rabbitmqadmin", "--bash-completion", shells: [:bash],
                                          base_name: "rabbitmqadmin", shell_parameter_format: :none)
