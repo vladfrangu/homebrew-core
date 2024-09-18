@@ -3,8 +3,8 @@ class Erlang < Formula
   homepage "https://www.erlang.org/"
   # Download tarball from GitHub; it is served faster than the official tarball.
   # Don't forget to update the documentation resource along with the url!
-  url "https://github.com/erlang/otp/releases/download/OTP-26.2.5/otp_src_26.2.5.tar.gz"
-  sha256 "de155c4ad9baab2b9e6c96dbd03bf955575a04dd6feee9c08758beb28484c9f6"
+  url "https://github.com/erlang/otp/releases/download/OTP-27.1/otp_src_27.1.tar.gz"
+  sha256 "5e65d421c6afcac05c6ef38ee49d6f87e74227f282a639d32e890f6b6c456ec0"
   license "Apache-2.0"
 
   livecheck do
