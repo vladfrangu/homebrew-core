@@ -1,26 +1,9 @@
 class Ghostscript < Formula
   desc "Interpreter for PostScript and PDF"
   homepage "https://www.ghostscript.com/"
+  url "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10040/ghostpdl-10.04.0.tar.xz"
+  sha256 "0603f5629bc6f567b454911d104cd96702489c9e70e577787843f480b23d4a77"
   license "AGPL-3.0-or-later"
-
-  stable do
-    url "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10031/ghostpdl-10.03.1.tar.xz"
-    sha256 "05eee45268f6bb2c6189f9a40685c4608ca089443a93f2af5f5194d83dc368db"
-
-    on_macos do
-      # 1. Prevent dependent rebuilds on minor version bumps.
-      # Reported upstream at:
-      #   https://bugs.ghostscript.com/show_bug.cgi?id=705907
-      patch :DATA
-    end
-
-    # Backport fix for missing pointer dereference
-    # https://bugs.ghostscript.com/show_bug.cgi?id=707649
-    patch do
-      url "https://github.com/ArtifexSoftware/ghostpdl/commit/90cabe08422afdd16bac5dd9217602679d943045.patch?full_index=1"
-      sha256 "deed9573aa17adbab2776f44b58a851b5aac06e2cdd99440169ca16ec9504de0"
-    end
-  end
 
   # The GitHub tags omit delimiters (e.g. `gs9533` for version 9.53.3). The
   # `head` repository tags are formatted fine (e.g. `ghostpdl-9.53.3`) but a
@@ -87,9 +70,7 @@ class Ghostscript < Formula
               --disable-gtk
               --with-system-libtiff
               --without-x]
-    # Work around neon detection bug: https://bugs.ghostscript.com/show_bug.cgi?id=707993
-    odie "`--disable-neon` workaround should be removed!" if build.stable? && version > "10.03.1"
-    args << "--disable-neon" if DevelopmentTools.clang_build_version >= 1600
+
     system configure, *std_configure_args, *args
 
     # Install binaries and libraries
@@ -104,40 +85,3 @@ class Ghostscript < Formula
     assert_match "Hello World!", shell_output("#{bin}/ps2ascii #{ps}")
   end
 end
-
-__END__
-diff --git a/base/unix-dll.mak b/base/unix-dll.mak
-index 89dfa5a..c907831 100644
---- a/base/unix-dll.mak
-+++ b/base/unix-dll.mak
-@@ -100,10 +100,26 @@ GS_DLLEXT=$(DLL_EXT)
- 
- 
- # MacOS X
--#GS_SOEXT=dylib
--#GS_SONAME=$(GS_SONAME_BASE).$(GS_SOEXT)
--#GS_SONAME_MAJOR=$(GS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
--#GS_SONAME_MAJOR_MINOR=$(GS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
-+GS_SOEXT=dylib
-+GS_SONAME=$(GS_SONAME_BASE).$(GS_SOEXT)
-+GS_SONAME_MAJOR=$(GS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
-+GS_SONAME_MAJOR_MINOR=$(GS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
-+
-+PCL_SONAME=$(PCL_SONAME_BASE).$(GS_SOEXT)
-+PCL_SONAME_MAJOR=$(PCL_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
-+PCL_SONAME_MAJOR_MINOR=$(PCL_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
-+
-+XPS_SONAME=$(XPS_SONAME_BASE).$(GS_SOEXT)
-+XPS_SONAME_MAJOR=$(XPS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
-+XPS_SONAME_MAJOR_MINOR=$(XPS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
-+
-+PDF_SONAME=$(PDF_SONAME_BASE).$(GS_SOEXT)
-+PDF_SONAME_MAJOR=$(PDF_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
-+PDF_SONAME_MAJOR_MINOR=$(PDF_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
-+
-+GPDL_SONAME=$(GPDL_SONAME_BASE).$(GS_SOEXT)
-+GPDL_SONAME_MAJOR=$(GPDL_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
-+GPDL_SONAME_MAJOR_MINOR=$(GPDL_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
- #LDFLAGS_SO=-dynamiclib -flat_namespace
- #LDFLAGS_SO_MAC=-dynamiclib -install_name $(GS_SONAME_MAJOR_MINOR)
- #LDFLAGS_SO=-dynamiclib -install_name $(FRAMEWORK_NAME)
